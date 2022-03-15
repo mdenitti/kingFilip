@@ -1,4 +1,7 @@
 <?php
+
+use Dompdf\Dompdf;
+require 'vendor/autoload.php';
 class DB {
     private $host = 'localhost';
     private $user = 'root';
@@ -16,12 +19,20 @@ class Addguest {
     // declare a public property for usage outside our class on
     // an instantiated object of Addguest
     public $lastid;
+    public $firstName;
+    public $lastName;
+    public $bDate;
 
     public function __construct($firstName, $lastName,$bDate) {
         // retrieve te values, but also insert them in the database
         // i need a DB class!
         $db = new DB();
         $dbconnection = $db->connect();
+
+        // Fill for usage in PDF
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
+        $this->bDate = $bDate;
 
         // Get our query in order
         $query = "INSERT INTO `kandidates` (`firstName`, `lastName`, `bDate`) VALUES ('$firstName', '$lastName', '$bDate');";
@@ -52,5 +63,23 @@ class Imagetools {
         $url = "https://chart.googleapis.com/chart?cht=qr&choe=UTF-8&chs=250x250&chl=onsdomein.be?id=".$id;
         $qrCode = file_get_contents($url);
         return 'data:image/png;base64,'. base64_encode($qrCode);
+    }
+}
+class PDFtools extends Imagetools {
+    public function generate($qr,$data,$filip) {
+        // instantiate our DOMPDF object
+        $dompdf = new Dompdf();
+
+        $output = "<img src='$filip' width='400'>";
+        $output .= "<img src='$qr'>";
+        $output .= "$data->firstName<hr>";
+        $output .= "$data->lastName<hr>";
+        $output .= "$data->bDate<hr>";
+
+        $dompdf->loadHtml($output);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        ob_end_clean();
+        $dompdf->stream('export.pdf');
     }
 }

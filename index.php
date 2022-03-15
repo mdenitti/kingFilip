@@ -9,12 +9,16 @@ if (isset($_POST['firstName'])) {
    $addGuest = new Addguest($_POST['firstName'],$_POST['lastName'],$_POST['bDate']);
    // print_r($addGuest);
 
-   echo $addGuest->lastid;
 
    $qrcode = new Imagetools();
    $qrcodeIMG = $qrcode->qrCodeMake($addGuest->lastid);
+   $imageFilip = $qrcode->imgConvertPDF('filip.jpg');
+
    echo "<img src='$qrcodeIMG'>";
 
+   $pdf = new PDFtools();
+   $pdf->generate($qrcodeIMG,$addGuest,$imageFilip);
+   // Redirect naar een succes pagina...
 }
 ?>
 <!DOCTYPE html>
