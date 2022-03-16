@@ -10,6 +10,11 @@ class DB {
 
     public function connect() {
         $conn = new mysqli($this->host, $this->user, $this->password, $this->database);
+
+        if ($conn === false) {
+            die("ERROR: Could not connect. " . $conn->connect_error);
+        }
+
         return $conn;
     }
 }
@@ -82,4 +87,18 @@ class PDFtools extends Imagetools {
         ob_end_clean();
         $dompdf->stream('export.pdf');
     }
+}
+
+class Checkid {
+    public $idObject;
+
+    public function __construct($id) {
+        $db = new DB();
+        $dbconnection = $db->connect();
+        $query = "SELECT * FROM kandidates WHERE id=$id";
+        $result = $dbconnection->query($query)->fetch_assoc();
+
+        $this->idObject = $result;
+    }
+
 }
